@@ -91,8 +91,8 @@ function Swap(x1, y1, x2, y2)
 var mpx = 0;
 var mpy = 0;
 var pressed = false;
-var brushRadius = 7;
-var brushType = 1;
+var brushSize = 7;
+var brushId = 1;
 var pause = true;
 var elements = [];
 
@@ -125,9 +125,9 @@ function Draw()
     {
         for(let x = 0; x < GAME_WIDTH; x++)
         {
-            if(pressed && ((x-mpx)*(x-mpx)+(y-mpy)*(y-mpy) < brushRadius*brushRadius))
+            if(pressed && ((x-mpx)*(x-mpx)+(y-mpy)*(y-mpy) < brushSize*brushSize))
             {
-                gameTable[y][x] = {id: brushType};
+                gameTable[y][x] = {id: brushId};
                 elements[gameTable[y][x].id].Awake(gameTable[y][x], x, y);
             }
             
