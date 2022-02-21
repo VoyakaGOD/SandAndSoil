@@ -94,7 +94,8 @@ var mpy = 0;
 var pressed = false;
 var brushSize = 7;
 var brushId = 1;
-var pause = true;
+var pause = false;
+var replacement = true;
 var elements = [];
 
 canvas.addEventListener('mousemove', (event) => {
@@ -116,23 +117,18 @@ canvas.addEventListener("mouseout", (event) => {
 
 function Draw()
 {
-    if(pause)
-    {
-        requestAnimationFrame(Draw);
-        return;
-    }
-
     for(let y = GAME_HEIGHT-1; y >= 0; y--)
     {
         for(let x = 0; x < GAME_WIDTH; x++)
         {
-            if(pressed && ((x-mpx)*(x-mpx)+(y-mpy)*(y-mpy) < brushSize*brushSize))
+            if(pressed && ((x-mpx)*(x-mpx)+(y-mpy)*(y-mpy) < brushSize*brushSize) && (replacement || gameTable[y][x].id != brushId))
             {
                 gameTable[y][x] = {id: brushId};
                 elements[gameTable[y][x].id].Awake(gameTable[y][x], x, y);
             }
-            
-            elements[gameTable[y][x].id].Update(gameTable[y][x], x, y);
+
+            if(!pause)
+                elements[gameTable[y][x].id].Update(gameTable[y][x], x, y);
         }
     }
 
@@ -143,5 +139,3 @@ function Draw()
     UpdateCanvas();
     requestAnimationFrame(Draw);
 }
-
-requestAnimationFrame(Draw);

@@ -36,11 +36,13 @@ canvas
 .topMenuItem
 {
     display: inline-block;
-    width: 150px;
+    width: 175px;
     height: 100%;
     text-align: center;
     color: white;
     opacity: 0.5;
+    font-size: 25px;
+    line-height: 35px;
 }
 
 .topMenuItem:hover
@@ -52,7 +54,7 @@ canvas
 {
     z-index: 10;
     position: absolute;
-    width: 150px;
+    width: 175px;
     height: 35px;
     background-color: #444444;
     text-align: center;
@@ -60,21 +62,22 @@ canvas
 
 .GUIButton
 {
-    width: 150px;
+    width: 100%;
     height: 35px;
     line-height: 35px;
     text-align: center;
     color: white;
     opacity: 0.5;
-}
-
-.GUISlider
-{
-    width: 130px;
-    height: 35px;
+    font-size: 20px;
 }
 
 .GUIButton:hover
 {
     opacity: 1.0;
+}
+
+.GUISlider
+{
+    width: 80%;
+    height: 35px;
 }

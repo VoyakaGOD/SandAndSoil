@@ -35,5 +35,5 @@ elements = [
 }
 ];
 
-pause = false;
+requestAnimationFrame(Draw);
 CreateElementButtons();
