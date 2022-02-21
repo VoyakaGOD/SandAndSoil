@@ -69,7 +69,7 @@ function GetElement(x, y)
         return {id: -1};
     if(y < 0)
         return {id: 0};
-    return {id: gameTable[y][x].id};
+    return gameTable[y][x];
 }
 
 function Change(x, y, id)
@@ -77,6 +77,7 @@ function Change(x, y, id)
     if(!IsCorrect(x, y)) return;
 
     gameTable[y][x] = {id};
+    elements[id].Awake(gameTable[y][x], x, y);
 }
 
 function Swap(x1, y1, x2, y2)
