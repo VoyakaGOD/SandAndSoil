@@ -71,6 +71,17 @@ function GetElement(x, y)
     return gameTable[y][x];
 }
 
+var elementsCombined = () => {};
+
+function CombineElements(x1, y1, x2, y2, resultId)
+{
+    gameTable[y1][x1] = CreateInstance(resultId);
+    elements[resultId].Awake(gameTable[y1][x1], x1, y1);
+    gameTable[y2][x2] = CreateInstance(VOID_ID);
+    elements[VOID_ID].Awake(gameTable[y2][x2], x2, y2);
+    elementsCombined();
+}
+
 function Change(x, y, id)
 {
     if(!IsCorrect(x, y)) return;

@@ -37,6 +37,7 @@ function AddTopMenuItem(text, onclick, dropdown)
     }
     dropdowns.push(dropdown);
     topMenu.appendChild(item);
+    return item;
 }
 
 function CreateGUIPanel(order, itemCount)
@@ -102,11 +103,11 @@ AddTopMenuItem("pause", (self) =>{
         self.innerHTML = "pause";
 }, null);
 
-let replacementButton = AddButton(brushPanel, "replacement" + ToOnOff(replacement), (ge, me) => {
+const replacementButton = AddButton(brushPanel, "replacement" + ToOnOff(replacement), (ge, me) => {
     replacement = !replacement;
     replacementButton.innerHTML = "replacement" + ToOnOff(replacement);
 });
-let brushSizeSlider = AddSlider(brushPanel, 1, 9, brushSize, 1, (event) => brushSize = brushSizeSlider.value);
+const brushSizeSlider = AddSlider(brushPanel, 1, 9, brushSize, 1, (event) => brushSize = brushSizeSlider.value);
 
 function CreateElementButtons()
 {

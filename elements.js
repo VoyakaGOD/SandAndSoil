@@ -42,14 +42,9 @@ function Fire(self, x, y)
 {
     dx = 1 - Math.floor(Math.random() * 3);
     if(GetElement(x+dx,y-1).id == 1)
-    {
         Swap(x,y,x+dx,y-1);
-    }
     else if(GetElement(x+dx,y-1).id == 2)
-    {
-        Change(x+dx,y-1, 6);
-        Change(x,y, 1);
-    }
+        CombineElements(x+dx,y-1,x,y,6);
     self.val -= 0.1;
     if(self.val < 0)
         Change(x, y, 1);
@@ -110,7 +105,7 @@ elements = [
 {
     name: "fire",
     mass: 1,
-    Awake: (self, x, y) => self.val = Math.random(),
+    Awake: (self, x, y) => self.val = 0.5+Math.random()*0.5,
     Update: Fire,
     Draw: (self, x, y) => Repaint(x, y, rgb(120 + Math.floor(self.val*66),50,0))
 },
