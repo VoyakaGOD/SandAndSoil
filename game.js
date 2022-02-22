@@ -113,12 +113,16 @@ canvas.addEventListener("mouseout", (event) => {
     pressed = false;
 });
 
+var inverseUpdateDirection = false;
+
 function Draw()
 {
     for(let y = GAME_HEIGHT-1; y >= 0; y--)
     {
-        for(let x = 0; x < GAME_WIDTH; x++)
+        for(let sx = 0; sx < GAME_WIDTH; sx++)
         {
+            let x = sx;
+            if(inverseUpdateDirection) x = GAME_WIDTH - sx - 1;
             if(pressed && ((x-mpx)*(x-mpx)+(y-mpy)*(y-mpy) < brushSize*brushSize) && (replacement || gameTable[y][x].id != brushId))
             {
                 gameTable[y][x] = CreateInstance(brushId);
@@ -129,6 +133,8 @@ function Draw()
                 elements[gameTable[y][x].id].Update(gameTable[y][x], x, y);
         }
     }
+
+    inverseUpdateDirection = !inverseUpdateDirection;
 
     for(let y = GAME_HEIGHT-1; y >= 0; y--)
         for(let x = 0; x < GAME_WIDTH; x++)
