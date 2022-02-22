@@ -109,14 +109,23 @@ const replacementButton = AddButton(brushPanel, "replacement" + ToOnOff(replacem
 });
 const brushSizeSlider = AddSlider(brushPanel, 1, 9, brushSize, 1, (event) => brushSize = brushSizeSlider.value);
 
+const elementButtons = [];
+
 function CreateElementButtons()
 {
     let elementCount = 0;
     for(let i = 0; i < elements.length; i++)
     {
-        if(!elements[i].locked)
+        if(elements[i].locked)
         {
-            AddButton(elementsPanel, elements[i].name, (ge, me) => brushId = i);
+            elementButtons.push(null);
+        }
+        else
+        {
+            if(!elements[i].unlockAtLevel)
+                elementButtons.push(AddButton(elementsPanel, elements[i].name, (ge, me) => brushId = i));
+            else
+                elementButtons.push(AddButton(elementsPanel, "locked(" + elements[i].unlockAtLevel + ")", (ge, me) => {}));
             elementCount++;
         }
     }

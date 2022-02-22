@@ -38,14 +38,23 @@ function SimulateLiquid(self, x, y)
     Swap(x, y, np.x, np.y);
 }
 
-function Fire(self, x, y)
+function FlyUp(self, x, y)
 {
+    if(Math.random() < 0.5) return;
     dx = 1 - Math.floor(Math.random() * 3);
     if(GetElement(x+dx,y-1).id == 1)
         Swap(x,y,x+dx,y-1);
-    else if(GetElement(x+dx,y-1).id == 2)
-        CombineElements(x+dx,y-1,x,y,6);
-    self.val -= 0.1;
+    else if(GetElement(x+dx,y-1).id == 0)
+        Change(x, y, 1);
+}
+
+function BeFire(self, x, y)
+{
+    dx = 1 - Math.floor(Math.random() * 3);
+    if(GetElement(x+dx,y-1).id == 2) CombineElements(x+dx,y-1,x,y,6);
+    else if(GetElement(x+dx,y-1).id == 4) CombineElements(x+dx,y-1,x,y,7);
+    else FlyUp(self, x, y);
+    self.val -= 0.07;
     if(self.val < 0)
         Change(x, y, 1);
 }
@@ -106,15 +115,23 @@ elements = [
     name: "fire",
     mass: 1,
     Awake: (self, x, y) => self.val = 0.5+Math.random()*0.5,
-    Update: Fire,
+    Update: BeFire,
     Draw: (self, x, y) => Repaint(x, y, rgb(120 + Math.floor(self.val*66),50,0))
 },
 {
     name: "glass",
     mass: 999,
-    locked: true,
+    unlockAtLevel: 10,
     Awake: (self, x, y) => self.color = rgb(201,220,226),
     Update: DoNothing,
+    Draw: JustRepaint
+},
+{
+    name: "steam",
+    mass: 0,
+    unlockAtLevel: 5,
+    Awake: (self, x, y) => self.color = rgb(200,200,200),
+    Update: FlyUp,
     Draw: JustRepaint
 }
 ];

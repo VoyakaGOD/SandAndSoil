@@ -18,6 +18,14 @@ elementsCombined = () => {
         level++;
         exp = 0;
         nextExp = GetExpToLevel(level);
+        for(let i = 0; i < elements.length; i++)
+        {
+            if(!elements[i].locked && elements[i].unlockAtLevel == level)
+            {
+                elementButtons[i].innerHTML = elements[i].name;
+                elementButtons[i].onclick = (ge, me) => brushId = i;
+            }
+        }
     }
 };
 
