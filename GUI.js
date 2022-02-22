@@ -110,7 +110,14 @@ let brushSizeSlider = AddSlider(brushPanel, 1, 9, brushSize, 1, (event) => brush
 
 function CreateElementButtons()
 {
-    ChangePanelHeight(elementsPanel, elements.length);
+    let elementCount = 0;
     for(let i = 0; i < elements.length; i++)
-        AddButton(elementsPanel, elements[i].name, (ge, me) => brushId = i);
+    {
+        if(!elements[i].locked)
+        {
+            AddButton(elementsPanel, elements[i].name, (ge, me) => brushId = i);
+            elementCount++;
+        }
+    }
+    ChangePanelHeight(elementsPanel, elementCount);
 }

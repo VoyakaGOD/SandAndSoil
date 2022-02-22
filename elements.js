@@ -1,22 +1,59 @@
+function MixColors(first, second)
+{
+    let rnd = Math.random();
+    return rgb(first.r*rnd + second.r*(1-rnd),first.g*rnd + second.g*(1-rnd),first.b*rnd + second.b*(1-rnd));
+}
+
+function Fall(self, x, y)
+{
+    if(GetElement(x,y+1).src.mass < self.src.mass) Swap(x,y,x,y+1);
+    else if(GetElement(x+1,y+1).src.mass < self.src.mass && GetElement(x+1,y).src.mass < self.src.mass) Swap(x,y,x+1,y+1);
+    else if(GetElement(x-1,y+1).src.mass < self.src.mass && GetElement(x-1,y).src.mass < self.src.mass) Swap(x,y,x-1,y+1);
+}
+
+function Fire(self, x, y)
+{
+    dx = 1 - Math.floor(Math.random() * 3);
+    if(GetElement(x+dx,y-1).id == 1)
+    {
+        Swap(x,y,x+dx,y-1);
+    }
+    else if(GetElement(x+dx,y-1).id == 2)
+    {
+        Change(x+dx,y-1, 6);
+        Change(x,y, 1);
+    }
+    self.val -= 0.1;
+    if(self.val < 0)
+        Change(x, y, 1);
+}
+
 elements = [
 {
-    name: "void",
-    Awake: (self, x, y) => {},
+    name: "border",
+    locked: true,
+    mass: 999,
+    Awake: (self, x, y) => self.color = rgb(255,255,255),
     Update: (self, x, y) => {},
-    Draw: (self, x, y) => Repaint(x,y,rgb(0,0,0))
+    Draw: (self, x, y) => Repaint(x,y,self.color)
+},
+{
+    name: "void",
+    mass: 0,
+    Awake: (self, x, y) => self.color = rgb(0,0,0),
+    Update: (self, x, y) => {},
+    Draw: (self, x, y) => Repaint(x,y,self.color)
 },
 {
     name: "sand",
-    Awake: (self, x, y) => self.color = rgb(128,Math.floor(Math.random()*128),13),
-    Update: (self, x, y) => {
-        if(GetElement(x,y+1).id == 0) Swap(x,y,x,y+1);
-        else if(GetElement(x+1,y+1).id == 0 && GetElement(x+1,y).id == 0) Swap(x,y,x+1,y+1);
-        else if(GetElement(x-1,y+1).id == 0 && GetElement(x-1,y).id == 0) Swap(x,y,x-1,y+1);
-    },
+    mass: 2,
+    Awake: (self, x, y) => self.color = MixColors(rgb(214,131,79), rgb(163,82,51)),
+    Update: Fall,
     Draw: (self, x, y) => Repaint(x,y,self.color)
 },
 {
     name: "stone",
+    mass: 999,
     Awake: (self, x, y) => {
         self.val = 1;
         if(Math.random() < 0.03)
@@ -32,8 +69,30 @@ elements = [
     },
     Update: (self, x, y) => {},
     Draw: (self, x, y) => Repaint(x,y,self.color)
+},
+{
+    name: "water",
+    mass: 1,
+    Awake: (self, x, y) => self.color = MixColors(rgb(98,147,175), rgb(113,172,176)),
+    Update: Fall,
+    Draw: (self, x, y) => Repaint(x,y,self.color)
+},
+{
+    name: "fire",
+    mass: -1,
+    Awake: (self, x, y) => self.val = Math.random(),
+    Update: Fire,
+    Draw: (self, x, y) => Repaint(x, y, rgb(120 + Math.floor(self.val*66,50,0)))
+},
+{
+    name: "glass",
+    mass: 999,
+    locked: true,
+    Awake: (self, x, y) => self.color = rgb(201,220,226),
+    Update: (self, x, y) => {},
+    Draw: (self, x, y) => Repaint(x,y,self.color)
 }
 ];
 
-requestAnimationFrame(Draw);
+StartGameLoop();
 CreateElementButtons();

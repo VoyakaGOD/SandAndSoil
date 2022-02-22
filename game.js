@@ -39,14 +39,15 @@ function UpdateCanvas()
 
 const GAME_WIDTH = 128;
 const GAME_HEIGHT = 128;
+const BORDER_ID = 0;
+const VOID_ID = 1;
 
+var elements = [];
 const gameTable = [];
-for(let y = 0; y < GAME_HEIGHT; y++)
+
+function CreateInstance(id)
 {
-    let row = [];
-    for(let x = 0; x < GAME_WIDTH; x++)
-        row.push({id: 0});
-    gameTable.push(row);
+    return {id, src: elements[id]};
 }
 
 function Repaint(x, y, color)
@@ -65,10 +66,8 @@ function IsCorrect(x, y)
 
 function GetElement(x, y)
 {
-    if(x < 0 || x >= GAME_WIDTH || y >= GAME_HEIGHT)
-        return {id: -1};
-    if(y < 0)
-        return {id: 0};
+    if(!IsCorrect(x, y))
+        return CreateInstance(BORDER_ID);
     return gameTable[y][x];
 }
 
@@ -76,7 +75,7 @@ function Change(x, y, id)
 {
     if(!IsCorrect(x, y)) return;
 
-    gameTable[y][x] = {id};
+    gameTable[y][x] = CreateInstance(id);
     elements[id].Awake(gameTable[y][x], x, y);
 }
 
@@ -93,10 +92,9 @@ var mpx = 0;
 var mpy = 0;
 var pressed = false;
 var brushSize = 7;
-var brushId = 1;
+var brushId = 2;
 var pause = false;
 var replacement = true;
-var elements = [];
 
 canvas.addEventListener('mousemove', (event) => {
 	mpx = Math.floor(event.offsetX/4);
@@ -123,7 +121,7 @@ function Draw()
         {
             if(pressed && ((x-mpx)*(x-mpx)+(y-mpy)*(y-mpy) < brushSize*brushSize) && (replacement || gameTable[y][x].id != brushId))
             {
-                gameTable[y][x] = {id: brushId};
+                gameTable[y][x] = CreateInstance(brushId);
                 elements[gameTable[y][x].id].Awake(gameTable[y][x], x, y);
             }
 
@@ -137,5 +135,22 @@ function Draw()
             elements[gameTable[y][x].id].Draw(gameTable[y][x], x, y);
     
     UpdateCanvas();
+    requestAnimationFrame(Draw);
+}
+
+function StartGameLoop()
+{
+    for(let y = 0; y < GAME_HEIGHT; y++)
+    {
+        let row = [];
+        for(let x = 0; x < GAME_WIDTH; x++)
+            row.push(CreateInstance(VOID_ID));
+        gameTable.push(row);
+    }
+
+    for(let y = GAME_HEIGHT-1; y >= 0; y--)
+        for(let x = 0; x < GAME_WIDTH; x++)
+            elements[gameTable[y][x].id].Awake(gameTable[y][x], x, y);
+
     requestAnimationFrame(Draw);
 }
