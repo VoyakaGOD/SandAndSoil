@@ -11,6 +11,18 @@ var level = parseInt(localStorage.getItem("SandAndSoil_level")) || 1;
 var exp = 0;
 var nextExp = GetExpToLevel(level);
 
+function UnlockItems()
+{
+    for(let i = 0; i < elements.length; i++)
+    {
+        if(!elements[i].locked && elements[i].unlockAtLevel <= level)
+        {
+            elementButtons[i].innerHTML = elements[i].name;
+            elementButtons[i].onclick = (ge, me) => brushId = i;
+        }
+    }
+}
+
 elementsCombined = () => {
     exp++;
     if(exp >= nextExp)
@@ -18,14 +30,7 @@ elementsCombined = () => {
         level++;
         exp = 0;
         nextExp = GetExpToLevel(level);
-        for(let i = 0; i < elements.length; i++)
-        {
-            if(!elements[i].locked && elements[i].unlockAtLevel == level)
-            {
-                elementButtons[i].innerHTML = elements[i].name;
-                elementButtons[i].onclick = (ge, me) => brushId = i;
-            }
-        }
+        UnlockItems();
         localStorage.setItem("SandAndSoil_level", level.toString());
     }
 };
@@ -37,4 +42,5 @@ function UpdateExperienceInfo()
     requestAnimationFrame(UpdateExperienceInfo);
 }
 
+UnlockItems();
 requestAnimationFrame(UpdateExperienceInfo);

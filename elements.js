@@ -6,6 +6,33 @@ function MixColors(first, second)
     return rgb(first.r*rnd + second.r*(1-rnd),first.g*rnd + second.g*(1-rnd),first.b*rnd + second.b*(1-rnd));
 }
 
+function Unite(...funcs)
+{
+    return (self, x, y) => {
+        for(let func of funcs)
+            func(self, x, y);
+    }
+}
+
+function Check(...reactions)
+{
+    return (self, x, y) => {
+        let up = GetElement(x, y-1);
+        let down = GetElement(x, y+1);
+        let left = GetElement(x-1, y);
+        let right = GetElement(x+1, y);
+        for(let reaction of reactions)
+        {
+            reaction(self, x, y, up, x, y-1);
+            reaction(self, x, y, down, x, y+1);
+            reaction(self, x, y, left, x-1, y);
+            reaction(self, x, y, right, x+1, y);
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////
+
 function DoNothing(self, x, y) {}
 
 function JustRepaint(self, x, y)
@@ -30,20 +57,20 @@ function SimulateLiquid(self, x, y)
     let np = {x, y};
     if(Math.random() > 0.5)
     {
-        if(GetElement(x+1,y).src.mass < self.src.mass) np = {x:x+1, y:y};
+        if(CanFall(GetElement(x+1,y).src.mass, self.src.mass)) np = {x:x+1, y:y};
     }
     else
     {
-        if(GetElement(x-1,y).src.mass < self.src.mass) np = {x:x-1, y:y};
+        if(CanFall(GetElement(x-1,y).src.mass, self.src.mass)) np = {x:x-1, y:y};
     }
-    if(GetElement(x,y+1).src.mass < self.src.mass) np = {x:x, y:y+1};
+    if(CanFall(GetElement(x,y+1).src.mass, self.src.mass)) np = {x:x, y:y+1};
     Swap(x, y, np.x, np.y);
 }
 
 function FlyUp(self, x, y)
 {
     if(Math.random() < 0.5) return;
-    dx = 1 - Math.floor(Math.random() * 3);
+    let dx = 1 - Math.floor(Math.random() * 3);
     if(GetElement(x+dx,y-1).id == ElementIDs.void)
         Swap(x,y,x+dx,y-1);
     else if(GetElement(x+dx,y-1).id == ElementIDs.border)
@@ -52,7 +79,8 @@ function FlyUp(self, x, y)
 
 function BeFire(self, x, y)
 {
-    dx = 1 - Math.floor(Math.random() * 3);
+    if(Math.random() < 0.5) return;
+    let dx = 1 - Math.floor(Math.random() * 3);
     if(GetElement(x+dx,y-1).id == ElementIDs.sand) CombineElements(x+dx,y-1,x,y,ElementIDs.glass);
     else if(GetElement(x+dx,y-1).id == ElementIDs.water) CombineElements(x+dx,y-1,x,y,ElementIDs.steam);
     else FlyUp(self, x, y);
@@ -78,6 +106,39 @@ function CreateFractures(normal, fracture)
         else self.color = normal;
     }
 }
+
+function TransformByChance(newId, chance)
+{
+    return (self, x, y) => {
+        if(Math.random() < chance) Change(x, y, newId);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////
+
+function LavaReactions(self, sx, sy, obj, ox, oy)
+{
+    if(obj.id == ElementIDs.water)
+    {
+        CombineElements(sx,sy,ox,oy,ElementIDs.obsidian);
+        Change(ox, oy, ElementIDs.steam);
+    }
+    else if(obj.id == ElementIDs.stone && Math.random() < 0.03)
+    {
+        Change(ox, oy, ElementIDs.lava);
+    }
+}
+
+function WaterReactions(self, sx, sy, obj, ox, oy)
+{
+    if(obj.id == ElementIDs.magma_stone)
+    {
+        CombineElements(ox,oy,sx,sy,ElementIDs.stone);
+        Change(sx, sy, ElementIDs.steam);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////
 
 elements = [
 {
@@ -116,7 +177,7 @@ elements = [
         self.density = 1;
         self.color = MixColors(rgb(98,147,175), rgb(113,172,176));
     },
-    Update: SimulateLiquid,
+    Update: Unite(Check(WaterReactions), SimulateLiquid),
     Draw: JustRepaint
 },
 {
@@ -130,16 +191,16 @@ elements = [
     name: "glass",
     mass: 999,
     unlockAtLevel: 10,
-    Awake: (self, x, y) => self.color = rgb(201,220,226),
+    Awake: (self, x, y) => self.color = MixColors(rgb(201,220,226), rgb(151,170,176)),
     Update: DoNothing,
     Draw: JustRepaint
 },
 {
     name: "steam",
-    mass: 0,
+    mass: 0.5,
     unlockAtLevel: 5,
     Awake: (self, x, y) => self.color = rgb(200,200,200),
-    Update: FlyUp,
+    Update: Unite(TransformByChance(4, 0.001), FlyUp),
     Draw: JustRepaint
 },
 {
@@ -148,8 +209,24 @@ elements = [
     Awake: CreateFractures(rgb(100,0,0), rgb(200,10,10)),
     Update: DoNothing,
     Draw: JustRepaint
+},
+{
+    name: "obsidian",
+    mass: 999,
+    Awake: CreateFractures(rgb(46,41,58), rgb(91,73,101)),
+    Update: DoNothing,
+    Draw: JustRepaint
+},
+{
+    name: "lava",
+    mass: 3,
+    Awake: (self, x, y) => self.color = MixColors(rgb(170,70,70), rgb(150,00,0)),
+    Update: Unite(TransformByChance(8, 0.0001), Check(LavaReactions), SimulateLiquid),
+    Draw: JustRepaint
 }
 ];
+
+/////////////////////////////////////////////////////////////////////
 
 for(let i = 0; i < elements.length; i++)
     ElementIDs[elements[i].name.replace(" ", "_")] = i;
