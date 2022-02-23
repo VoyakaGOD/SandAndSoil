@@ -7,7 +7,7 @@ function GetExpToLevel(lvl)
     return 1561 + 316*lvl + 79*lvl*lvl;
 }
 
-var level = 1;
+var level = parseInt(localStorage.getItem("SandAndSoil_level")) || 1;
 var exp = 0;
 var nextExp = GetExpToLevel(level);
 
@@ -26,6 +26,7 @@ elementsCombined = () => {
                 elementButtons[i].onclick = (ge, me) => brushId = i;
             }
         }
+        localStorage.setItem("SandAndSoil_level", level.toString());
     }
 };
 

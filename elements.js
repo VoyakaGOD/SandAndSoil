@@ -59,6 +59,24 @@ function BeFire(self, x, y)
         Change(x, y, 1);
 }
 
+function CreateFractures(normal, fracture)
+{
+    return (self, x, y) => {
+        self.val = 0;
+        if(Math.random() < 0.03)
+            self.val = 1;
+        else
+        {
+            let tx = x + Math.floor(Math.random()*3)-1;
+            let ty = y + Math.floor(Math.random()*3)-1;
+            if(GetElement(tx,ty).id == self.id && GetElement(tx,ty).val == 1)
+                self.val = 1;
+        }
+        if(self.val == 1) self.color = fracture;
+        else self.color = normal;
+    }
+}
+
 elements = [
 {
     name: "border",
@@ -85,19 +103,7 @@ elements = [
 {
     name: "stone",
     mass: 999,
-    Awake: (self, x, y) => {
-        self.val = 1;
-        if(Math.random() < 0.03)
-            self.val = 0;
-        else
-        {
-            let tx = x + Math.floor(Math.random()*3)-1;
-            let ty = y + Math.floor(Math.random()*3)-1;
-            if(GetElement(tx,ty).id == self.id && GetElement(tx,ty).val == 0)
-                self.val = 0;
-        }
-        self.color = rgb(self.val*64 + 96, self.val*64 + 96, self.val*64 + 96);
-    },
+    Awake: CreateFractures(rgb(160,160,160), rgb(96,96,96)),
     Update: DoNothing,
     Draw: JustRepaint
 },
@@ -132,6 +138,13 @@ elements = [
     unlockAtLevel: 5,
     Awake: (self, x, y) => self.color = rgb(200,200,200),
     Update: FlyUp,
+    Draw: JustRepaint
+},
+{
+    name: "magma stone",
+    mass: 999,
+    Awake: CreateFractures(rgb(100,0,0), rgb(200,10,10)),
+    Update: DoNothing,
     Draw: JustRepaint
 }
 ];
