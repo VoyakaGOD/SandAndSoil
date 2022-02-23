@@ -1,3 +1,5 @@
+const ElementIDs = {};
+
 function MixColors(first, second)
 {
     let rnd = Math.random();
@@ -42,17 +44,17 @@ function FlyUp(self, x, y)
 {
     if(Math.random() < 0.5) return;
     dx = 1 - Math.floor(Math.random() * 3);
-    if(GetElement(x+dx,y-1).id == 1)
+    if(GetElement(x+dx,y-1).id == ElementIDs.void)
         Swap(x,y,x+dx,y-1);
-    else if(GetElement(x+dx,y-1).id == 0)
+    else if(GetElement(x+dx,y-1).id == ElementIDs.border)
         Change(x, y, 1);
 }
 
 function BeFire(self, x, y)
 {
     dx = 1 - Math.floor(Math.random() * 3);
-    if(GetElement(x+dx,y-1).id == 2) CombineElements(x+dx,y-1,x,y,6);
-    else if(GetElement(x+dx,y-1).id == 4) CombineElements(x+dx,y-1,x,y,7);
+    if(GetElement(x+dx,y-1).id == ElementIDs.sand) CombineElements(x+dx,y-1,x,y,ElementIDs.glass);
+    else if(GetElement(x+dx,y-1).id == ElementIDs.water) CombineElements(x+dx,y-1,x,y,ElementIDs.steam);
     else FlyUp(self, x, y);
     self.val -= 0.07;
     if(self.val < 0)
@@ -148,6 +150,9 @@ elements = [
     Draw: JustRepaint
 }
 ];
+
+for(let i = 0; i < elements.length; i++)
+    ElementIDs[elements[i].name.replace(" ", "_")] = i;
 
 StartGameLoop();
 CreateElementButtons();
