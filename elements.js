@@ -6,6 +6,11 @@ function MixColors(first, second)
     return rgb(first.r*rnd + second.r*(1-rnd),first.g*rnd + second.g*(1-rnd),first.b*rnd + second.b*(1-rnd));
 }
 
+function MixColorsByValue(first, second, value)
+{
+    return rgb(first.r*value + second.r*(1-value),first.g*value + second.g*(1-value),first.b*value + second.b*(1-value));
+}
+
 function Unite(...funcs)
 {
     return (self, x, y) => {
@@ -84,9 +89,9 @@ function BeFire(self, x, y)
     if(GetElement(x+dx,y-1).id == ElementIDs.sand) CombineElements(x+dx,y-1,x,y,ElementIDs.glass);
     else if(GetElement(x+dx,y-1).id == ElementIDs.water) CombineElements(x+dx,y-1,x,y,ElementIDs.steam);
     else FlyUp(self, x, y);
-    self.val -= 0.07;
+    self.val -= 0.03;
     if(self.val < 0)
-        Change(x, y, 1);
+        Change(x, y, ElementIDs.void);
 }
 
 function CreateFractures(normal, fracture)
@@ -127,6 +132,10 @@ function LavaReactions(self, sx, sy, obj, ox, oy)
     {
         Change(ox, oy, ElementIDs.lava);
     }
+    else if(obj.id == ElementIDs.magma_stone && Math.random() < 0.01)
+    {
+        Change(sx, sy, ElementIDs.magma_stone);
+    }
 }
 
 function WaterReactions(self, sx, sy, obj, ox, oy)
@@ -135,6 +144,27 @@ function WaterReactions(self, sx, sy, obj, ox, oy)
     {
         CombineElements(ox,oy,sx,sy,ElementIDs.stone);
         Change(sx, sy, ElementIDs.steam);
+    }
+}
+
+function GunPowderReactions(self, sx, sy, obj, ox, oy)
+{
+    if(obj.id == ElementIDs.fire)
+    {
+        Change(ox, oy, ElementIDs.explosion);
+    }
+}
+
+function ExplosionReactions(self, sx, sy, obj, ox, oy)
+{
+    if(obj.id == ElementIDs.gun_powder)
+    {
+        Change(ox, oy, ElementIDs.explosion);
+    }
+    if(obj.id != ElementIDs.explosion && self.val > 30)
+    {
+        Change(ox, oy, ElementIDs.explosion);
+        GetElement(ox,oy).val = self.val - 10;
     }
 }
 
@@ -185,7 +215,7 @@ elements = [
     mass: 1,
     Awake: (self, x, y) => self.val = 0.5+Math.random()*0.5,
     Update: BeFire,
-    Draw: (self, x, y) => Repaint(x, y, rgb(120 + Math.floor(self.val*66),50,0))
+    Draw: (self, x, y) => Repaint(x, y, MixColorsByValue(rgb(90,20,0), rgb(50,0,0), self.val))
 },
 {
     name: "glass",
@@ -199,7 +229,7 @@ elements = [
     name: "steam",
     mass: 0.5,
     unlockAtLevel: 5,
-    Awake: (self, x, y) => self.color = rgb(200,200,200),
+    Awake: (self, x, y) => self.color = MixColors(rgb(190,190,190), rgb(210,210,210)),
     Update: Unite(TransformByChance(4, 0.001), FlyUp),
     Draw: JustRepaint
 },
@@ -213,6 +243,7 @@ elements = [
 {
     name: "obsidian",
     mass: 999,
+    unlockAtLevel: 7,
     Awake: CreateFractures(rgb(46,41,58), rgb(91,73,101)),
     Update: DoNothing,
     Draw: JustRepaint
@@ -221,8 +252,35 @@ elements = [
     name: "lava",
     mass: 3,
     Awake: (self, x, y) => self.color = MixColors(rgb(170,70,70), rgb(150,00,0)),
-    Update: Unite(TransformByChance(8, 0.0001), Check(LavaReactions), SimulateLiquid),
+    Update: Unite(TransformByChance(8, 0.0000035), Check(LavaReactions), SimulateLiquid),
     Draw: JustRepaint
+},
+{
+    name: "gun powder",
+    mass: 2,
+    unlockAtLevel: 13,
+    Awake: (self, x, y) => self.color = MixColors(rgb(90,89,86), rgb(44,52,46)),
+    Update: Unite(Fall, Check(GunPowderReactions)),
+    Draw: JustRepaint
+},
+{
+    name: "explosion",
+    mass: 999,
+    locked: true,
+    Awake: (self, x, y) => self.val = 255,
+    Update: (self, x, y) => {   
+        if(Math.random() < 0.333) return; 
+        Check(ExplosionReactions)(self, x, y);
+        if(self.val > 20)
+        {
+            self.val -= 15;
+        }
+        else
+        {
+            Change(x, y, ElementIDs.void);
+        }
+    },
+    Draw: (self, x, y) => Repaint(x, y, rgb(self.val, self.val, self.val))
 }
 ];
 
